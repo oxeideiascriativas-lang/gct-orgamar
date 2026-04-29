@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GCT — Orgamar Representações</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--r:#bf0811;--b:#002b81;--w:#fff;--r2:#fdf0f0;--b2:#eef1fb;--rd:#8c0009;--bd:#001a5c;--bg:#f2f4f9;--bg2:#e4e7f0;--brd:#d4d8eb;--txt:#0d1435;--muted:#6b7494;--card:#fff;--green:#1a7a3f;--gb:#e6f4ed;--amber:#9a5000;--ab:#fff4e0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);min-height:100vh}
+.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--b) 0%,#001a5c 100%);padding:20px}
+.login-box{background:#fff;border-radius:16px;padding:36px 32px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.login-logo{text-align:center;margin-bottom:24px}
+.login-logo-text{font-size:22px;font-weight:700;color:var(--b);letter-spacing:.02em}
+.login-logo-text span{color:var(--r)}
+.login-tagline{font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
+.login-title{font-size:14px;font-weight:500;color:var(--b);margin-bottom:4px;text-align:center}
+.login-sub{font-size:11px;color:var(--muted);text-align:center;margin-bottom:24px}
+.login-form{display:flex;flex-direction:column;gap:14px}
+.lf-group{display:flex;flex-direction:column;gap:5px}
+.lf-group label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.lf-group select,.lf-group input{font-size:13px;padding:10px 14px;border-radius:8px;border:1.5px solid var(--brd);background:#fff;color:var(--txt);width:100%;transition:border-color .15s;outline:none}
+.lf-group select:focus,.lf-group input:focus{border-color:var(--b);box-shadow:0 0 0 3px rgba(0,43,129,.1)}
+.lf-group input[type=password]{letter-spacing:.12em;font-size:16px}
+.btn-login{background:var(--b);color:#fff;border:none;font-size:14px;font-weight:600;padding:12px;border-radius:8px;cursor:pointer;transition:background .15s;margin-top:4px}
+.btn-login:hover{background:var(--bd)}
+.login-error{background:var(--r2);border:1px solid var(--r);color:var(--rd);font-size:12px;padding:8px 12px;border-radius:6px;display:none;text-align:center}
+.login-hint{font-size:10px;color:var(--muted);text-align:center;margin-top:16px;font-style:italic}
+.topbar{background:var(--b);display:flex;align-items:center;gap:16px;padding:0 20px;height:58px;position:sticky;top:0;z-index:100}
+.brand-text{font-size:13px;font-weight:600;color:#fff;letter-spacing:.01em}
+.brand-text span{color:rgba(255,255,255,.45);font-weight:400}
+.topbar-divider{width:1px;height:28px;background:rgba(255,255,255,.2)}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+.user-pill{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border:0.5px solid rgba(255,255,255,.2);border-radius:6px;padding:5px 12px}
+.user-pill span{font-size:12px;color:#fff;font-weight:500}
+.logout-btn{font-size:11px;color:rgba(255,255,255,.6);cursor:pointer;padding:5px 10px;border-radius:4px;border:0.5px solid rgba(255,255,255,.25);transition:all .15s}
+.logout-btn:hover{background:rgba(255,255,255,.1);color:#fff}
+.pr-pill{display:flex;align-items:center;background:rgba(255,255,255,.1);border:0.5px solid rgba(255,255,255,.2);border-radius:6px;padding:5px 12px}
+.pr-pill select{background:transparent;border:none;color:#fff;font-size:12px;font-weight:500;cursor:pointer;outline:none;-webkit-appearance:none;min-width:200px}
+.pr-pill select option{background:#002b81;color:#fff}
+.tabbar{background:var(--card);border-bottom:1px solid var(--brd);padding:0 20px;display:flex;gap:2px;overflow-x:auto}
+.tab{font-size:12px;padding:11px 16px;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:all .15s;border-radius:4px 4px 0 0}
+.tab:hover{color:var(--b);background:var(--b2)}
+.tab.active{color:var(--b);border-bottom-color:var(--r);font-weight:500}
+.view{display:none;padding:20px;min-height:calc(100vh - 116px)}
+.view.active{display:block}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:18px}
+.kpi{background:var(--card);border-radius:8px;border:0.5px solid var(--brd);padding:14px 16px;position:relative;overflow:hidden;transition:box-shadow .15s}
+.kpi:hover{box-shadow:0 2px 12px rgba(0,43,129,.09)}
+.kpi-ac{position:absolute;top:0;left:0;width:3px;height:100%;border-radius:3px 0 0 3px}
+.kpi-lbl{font-size:10px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.kpi-num{font-size:26px;font-weight:500;line-height:1;color:var(--b)}
+.kpi-sub{font-size:10px;color:var(--muted);margin-top:4px}
+.kpi-num.red{color:var(--r)}.kpi-num.grn{color:var(--green)}.kpi-num.amb{color:var(--amber)}
+.stitle{font-size:10px;font-weight:600;color:var(--b);text-transform:uppercase;letter-spacing:.07em;margin:18px 0 10px;display:flex;align-items:center;gap:8px}
+.stitle::after{content:"";flex:1;height:1px;background:var(--brd)}
+.alert{border-radius:6px;padding:10px 14px;font-size:12px;margin-bottom:8px;border-left:3px solid;display:flex;align-items:flex-start;gap:8px}
+.alert.danger{background:var(--r2);border-color:var(--r);color:var(--rd)}
+.alert.success{background:var(--gb);border-color:var(--green);color:#14532d}
+.twrap{overflow-x:auto;border-radius:8px;border:0.5px solid var(--brd);background:var(--card);margin-bottom:6px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:var(--b);color:#fff;font-weight:500;font-size:10px;padding:9px 12px;text-align:left;white-space:nowrap;letter-spacing:.02em}
+th:first-child{border-radius:8px 0 0 0}th:last-child{border-radius:0 8px 0 0}
+td{padding:8px 12px;border-bottom:0.5px solid var(--brd);color:var(--txt);vertical-align:middle;word-break:break-word}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--bg)}
+.t-name{font-weight:500;font-size:12px}.t-sub{font-size:10px;color:var(--muted);margin-top:2px}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:3px 8px;border-radius:20px;font-weight:500;white-space:nowrap}
+.bg{background:var(--gb);color:#14532d}.ba{background:var(--ab);color:#78350f}.br{background:var(--r2);color:var(--rd)}.bb{background:var(--b2);color:var(--bd)}.bp{background:#f0eeff;color:#3730a3}.bz{background:var(--bg2);color:var(--muted)}
+.ir-pill{display:inline-block;font-size:10px;padding:2px 7px;border-radius:4px;font-weight:500;margin:1px}
+.ir-M{background:#fff4e0;color:#7c3a00;border:0.5px solid #f59e0b}
+.ir-P{background:#e8eaf2;color:#002b81;border:0.5px solid #6b7494}
+.ir-G{background:#f5e6f0;color:#6b21a8;border:0.5px solid #a855f7}
+.lk a{color:var(--b);text-decoration:underline;font-size:11px;white-space:nowrap}
+.lk a:hover{color:var(--r)}
+.fbar{margin-bottom:9px}
+.flabel{font-size:11px;color:var(--muted);margin-bottom:3px;display:flex;justify-content:space-between}
+.ftrack{background:var(--bg2);border-radius:3px;height:16px;overflow:hidden}
+.ffill{height:100%;border-radius:3px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.empty{font-size:12px;color:var(--muted);text-align:center;padding:32px}
+.pr-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-bottom:16px}
+.pr-card{background:var(--card);border-radius:8px;border:0.5px solid var(--brd);padding:14px;cursor:pointer;transition:all .15s;border-top:3px solid var(--brd)}
+.pr-card:hover{border-top-color:var(--b);box-shadow:0 2px 12px rgba(0,43,129,.1)}
+.pr-card-name{font-size:12px;font-weight:500;color:var(--txt);margin-bottom:2px}
+.pr-card-uf{font-size:10px;color:var(--muted);margin-bottom:8px}
+.pr-card-stats{display:flex;gap:12px}
+.pr-card-stat{font-size:10px;color:var(--muted)}
+.pr-card-stat strong{display:block;font-size:18px;font-weight:500}
+.av{width:30px;height:30px;border-radius:50%;background:var(--b);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;flex-shrink:0}
+.row-pr{display:flex;align-items:center;gap:8px}
+.cal-wrap{background:var(--card);border-radius:10px;border:0.5px solid var(--brd);padding:14px 16px;margin-bottom:16px}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cal-title{font-size:13px;font-weight:500;color:var(--b)}
+.cal-nav{display:flex;gap:6px}
+.cal-btn{border:0.5px solid var(--brd);background:var(--bg);border-radius:5px;width:28px;height:28px;cursor:pointer;font-size:16px;color:var(--muted);display:flex;align-items:center;justify-content:center;line-height:1}
+.cal-btn:hover{background:var(--b2);color:var(--b)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-dow{font-size:10px;font-weight:500;color:var(--muted);text-align:center;padding:3px 0;text-transform:uppercase}
+.cal-day{position:relative;border-radius:5px;height:36px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:default;user-select:none}
+.cal-day.other{color:var(--muted);opacity:.35}
+.cal-day.today{background:var(--b);color:#fff;font-weight:600}
+.cal-day-num{font-size:12px;line-height:1}
+.cal-dots{display:flex;gap:2px;margin-top:2px;flex-wrap:wrap;justify-content:center}
+.cal-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.cal-day[data-tip]{cursor:pointer}
+.cal-day[data-tip]:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:rgba(13,20,53,.93);color:#fff;font-size:11px;line-height:1.6;padding:8px 12px;border-radius:6px;white-space:pre-wrap;width:240px;z-index:9999;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.25)}
+.cal-day[data-tip]:hover::before{content:"";position:absolute;bottom:calc(100% + 1px);left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:rgba(13,20,53,.93);z-index:9999;pointer-events:none}
+.cal-legend{display:flex;gap:14px;margin-top:12px;padding-top:10px;border-top:0.5px solid var(--brd);flex-wrap:wrap}
+.cal-leg-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)}
+.fcard{background:var(--card);border-radius:10px;border:0.5px solid var(--brd);padding:20px;margin-bottom:16px}
+.fcard-title{font-size:13px;font-weight:500;color:var(--b);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--brd)}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fg{display:flex;flex-direction:column;gap:4px;position:relative}
+.fg label{font-size:11px;color:var(--muted);font-weight:500;display:flex;align-items:center;gap:5px}
+.fg input,.fg select,.fg textarea{font-size:12px;padding:7px 10px;border-radius:6px;border:0.5px solid var(--brd);background:var(--card);color:var(--txt);width:100%;transition:border-color .15s;outline:none}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--b);box-shadow:0 0 0 3px rgba(0,43,129,.1)}
+.fg textarea{resize:vertical;min-height:60px}
+.ff{grid-column:1/-1}
+.btn{background:var(--b);color:#fff;border:none;font-size:12px;font-weight:500;padding:8px 20px;border-radius:6px;cursor:pointer;transition:background .15s;margin-top:8px}
+.btn:hover{background:var(--bd)}
+.tip-icon{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:var(--b2);color:var(--b);font-size:10px;font-weight:700;cursor:help;position:relative;flex-shrink:0}
+.tip-icon:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);background:rgba(13,20,53,.93);color:#fff;font-size:11px;line-height:1.55;padding:8px 12px;border-radius:7px;white-space:pre-wrap;width:220px;z-index:9999;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.22);font-weight:400}
+.tip-icon:hover::before{content:"";position:absolute;bottom:calc(100% + 2px);left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:rgba(13,20,53,.93);z-index:9999;pointer-events:none}
+.tipo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.tipo-card{background:var(--card);border:1.5px solid var(--brd);border-radius:10px;padding:20px 16px;text-align:center;cursor:pointer;transition:all .18s}
+.tipo-card:hover{border-color:var(--b);box-shadow:0 2px 12px rgba(0,43,129,.1)}
+.tipo-card.sel{border-color:var(--b);background:var(--b2)}
+.tipo-card .tipo-icon{font-size:28px;margin-bottom:8px}
+.tipo-card .tipo-label{font-size:13px;font-weight:500;color:var(--txt)}
+.tipo-card .tipo-desc{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.4}
+.tipo-card.sel .tipo-label{color:var(--b)}
+.form-area{display:none}
+.form-area.active{display:block}
+.rel-resumo-full{display:none;font-size:11px;color:var(--muted);margin-top:6px;line-height:1.6;padding:8px;background:var(--bg);border-radius:5px;white-space:pre-wrap}
+.rel-toggle{font-size:10px;color:var(--b);cursor:pointer;text-decoration:underline;display:inline-block;margin-top:4px}
+.rel-toggle:hover{color:var(--r)}
+@media(max-width:600px){.fgrid{grid-template-columns:1fr}.ff{grid-column:1}.tipo-grid{grid-template-columns:1fr}.kpi-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen" class="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-text">ORGA<span>MAR</span></div>
+      <div class="login-tagline">Representações</div>
+    </div>
+    <div class="login-title">GCT — Gerenciamento Comercial</div>
+    <div class="login-sub">Acesse com seu usuário e senha</div>
+    <div class="login-form">
+      <div class="lf-group">
+        <label>Usuário</label>
+        <select id="loginUser">
+          <option value="">— Selecione —</option>
+          <option value="adm">Bruno (Administrador)</option>
+          <option value="joao">João Beltrão — PE/PB</option>
+          <option value="jose">José Mourão — CE</option>
+          <option value="francisco">Francisco Camelo — PA</option>
+          <option value="raimundo">Raimundo Lima — PI</option>
+          <option value="kauan">Kauan Freitag — AL</option>
+        </select>
+      </div>
+      <div class="lf-group">
+        <label>Senha</label>
+        <input type="password" id="loginPass" placeholder="Digite sua senha" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <div class="login-error" id="loginError">Usuário ou senha incorretos. Tente novamente.</div>
+      <button class="btn-login" onclick="doLogin()">Entrar</button>
+    </div>
+    <div class="login-hint">Em caso de dúvidas, entre em contato com o administrador</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="appScreen" style="display:none">
+  <div class="topbar">
+    <div class="brand-text">ORGAMAR <span>— GCT</span></div>
+    <div class="topbar-divider"></div>
+    <div id="prSelector" style="display:none"><div class="pr-pill"><select id="prSel" onchange="render()"></select></div></div>
+    <div class="topbar-right">
+      <div class="user-pill"><span id="userLabel"></span></div>
+      <div class="logout-btn" onclick="doLogout()">Sair</div>
+    </div>
+  </div>
+  <div class="tabbar" id="tabbar"></div>
+  <div id="dashboard" class="view"></div>
+  <div id="clientes" class="view"></div>
+  <div id="relatorios" class="view"></div>
+  <div id="funil" class="view"></div>
+  <div id="novo" class="view"></div>
+</div>
+
+<script>
+const USERS={
+  adm:      {senha:"Lica@160617", nome:"Bruno (Administrador)", role:"ADM"},
+  joao:     {senha:"CGT2026",     nome:"João Beltrão",          role:"PR", prId:"João Beltrão — PE/PB"},
+  jose:     {senha:"CGT2026",     nome:"José Mourão",           role:"PR", prId:"José Mourão — CE"},
+  francisco:{senha:"CGT2026",     nome:"Francisco Camelo",      role:"PR", prId:"Francisco Camelo — PA"},
+  raimundo: {senha:"CGT2026",     nome:"Raimundo Lima",         role:"PR", prId:"Raimundo Lima — PI"},
+  kauan:    {senha:"CGT2026",     nome:"Kauan Freitag",         role:"PR", prId:"Kauan Freitag — AL"},
+};
+
+const PRS=[
+  {id:"João Beltrão — PE/PB",   nome:"João Beltrão",     ufs:"PE / PB", irs:["Mamoré","Piatto","Galiotto"]},
+  {id:"José Mourão — CE",        nome:"José Mourão",      ufs:"CE",      irs:["Piatto"]},
+  {id:"Francisco Camelo — PA",   nome:"Francisco Camelo", ufs:"PA",      irs:["Mamoré","Piatto"]},
+  {id:"Raimundo Lima — PI",      nome:"Raimundo Lima",    ufs:"PI",      irs:["Piatto"]},
+  {id:"Kauan Freitag — AL",      nome:"Kauan Freitag",    ufs:"AL",      irs:["Mamoré"]},
+];
+const IRS=[{id:"Mamoré",css:"ir-M"},{id:"Piatto",css:"ir-P"},{id:"Galiotto",css:"ir-G"}];
+const STATUS_V=["Prospect","Agendado","Em negociação","Proposta enviada","Pedido fechado","Bloqueado (ext)","Recontato futuro","Sem interesse"];
+const PROXIMO_PASSO=["Enviar proposta comercial","Agendar reunião presencial","Agendar reunião por vídeo","Enviar amostras dos produtos","Realizar follow-up por WhatsApp","Ligar para o comprador","Enviar tabela de preços atualizada","Aguardar retorno do cliente","Apresentar portfólio completo","Negociar condições de pagamento","Confirmar pedido","Encaminhar à IR para suporte técnico","Recontato em data específica","Sem ação necessária no momento"];
+const CANAIS=["Distribuidor","Food Service","Varejo direto","Rede","Atacado","GMS","Outro"];
+const ORIGENS=["Indicação","Instagram","Site/Google","Evento","Cold call","WhatsApp","Indicação IR","Outro"];
+
+let clientes=[
+  // João Beltrão
+  {pr:"João Beltrão — PE/PB",uf:"PE",nome:"Grupo Pajeú",       contato:"Fabiano Pajeú",  canal:"Distribuidor",ir:"Piatto",  sv:"Agendado",        prox:"Agendar reunião presencial",   data:"2025-05-04",barr:"",insta:"",site:"",produtos:"",obs:"Cash local: 01 em Recife, 07 no sertão do estado"},
+  {pr:"João Beltrão — PE/PB",uf:"PE",nome:"Karne e Keijo",      contato:"Comprador",      canal:"Food Service",ir:"Piatto",  sv:"Agendado",        prox:"Agendar reunião presencial",   data:"2025-04-27",barr:"",insta:"",site:"https://www.karneKeijo.com.br/",produtos:"Bases e Fundos, Molhos",obs:"Distribuidor food"},
+  {pr:"João Beltrão — PE/PB",uf:"PE",nome:"Cadan Distribuidora",contato:"",               canal:"Distribuidor",ir:"Piatto",  sv:"Bloqueado (ext)", prox:"Recontato em data específica", data:"2026-06-01",barr:"Consultoria impedindo novos fornecedores até jun/26",insta:"",site:"",produtos:"",obs:"Fica em frente à Karne e Keijo"},
+  {pr:"João Beltrão — PE/PB",uf:"PE",nome:"B&A Distribuidora",  contato:"",               canal:"Distribuidor",ir:"Piatto",  sv:"Recontato futuro",prox:"Agendar reunião presencial",   data:"2025-05-10",barr:"",insta:"https://www.instagram.com/beacomercial?igsh=cTZoaXB6ZGdxamFh",site:"https://aebalimentosebebidas.com.br/",produtos:"",obs:"13K seguidores Instagram"},
+  // José Mourão — dados reais
+  {pr:"José Mourão — CE",uf:"CE",nome:"ISM (Restaurante Industrial)",contato:"Comprador",canal:"Food Service",ir:"Piatto",sv:"Em negociação",prox:"Aguardar retorno do cliente",data:"2025-05-10",barr:"",insta:"",site:"",
+   produtos:"Gelatina em Pó 120g, Pudim com Leite 510g, Mousses, Achocolatado 1kg, Chocolate em pó 33% e 50% Cacau, Amido de Milho, Amaciante de Carne, Caldo de Galinha, Caldo de Carne, Purê de Batatas",
+   obs:"Mix de interesse definido para o CE. Aguardando Área de Nutrição informar quantidade necessária de Purê de Batatas para amostragem e testes. Unidades podem ter mix divergente por regionalidade."},
+  {pr:"José Mourão — CE",uf:"CE",nome:"Omega Distrib.",contato:"",canal:"Distribuidor",ir:"Piatto",sv:"Em negociação",prox:"Aguardar retorno do cliente",data:"2025-05-05",barr:"Diferença significativa de custo — recebendo produto com pontuação anterior",insta:"",site:"",produtos:"Amido de Milho, Caldos de carne e galinha, Purê de Batatas, Batata em Flocos",obs:"Linha de refresco em pó ainda em avaliação"},
+  {pr:"José Mourão — CE",uf:"CE",nome:"Solmar",contato:"",canal:"Distribuidor",ir:"Piatto",sv:"Em negociação",prox:"Apresentar portfólio completo",data:"2025-05-08",barr:"",insta:"",site:"",produtos:"Em avaliação",obs:"Mix de 3 fabricantes atualmente"},
+  {pr:"José Mourão — CE",uf:"CE",nome:"Serlares",contato:"",canal:"Distribuidor",ir:"Piatto",sv:"Agendado",prox:"Agendar reunião presencial",data:"2025-05-05",barr:"",insta:"",site:"",produtos:"",obs:"Agendamento próxima semana"},
+  {pr:"José Mourão — CE",uf:"CE",nome:"Laredo",contato:"",canal:"Distribuidor",ir:"Piatto",sv:"Agendado",prox:"Agendar reunião presencial",data:"2025-05-05",barr:"",insta:"",site:"",produtos:"",obs:"Agendamento próxima semana"},
+  {pr:"José Mourão — CE",uf:"CE",nome:"Fortali",contato:"",canal:"Distribuidor",ir:"Piatto",sv:"Agendado",prox:"Agendar reunião presencial",data:"2025-05-05",barr:"",insta:"",site:"",produtos:"",obs:"Agendamento próxima semana"},
+  {pr:"José Mourão — CE",uf:"CE",nome:"Façanha",contato:"",canal:"Distribuidor",ir:"Piatto",sv:"Agendado",prox:"Agendar reunião presencial",data:"2025-05-05",barr:"",insta:"",site:"",produtos:"",obs:"Agendamento próxima semana"},
+  {pr:"José Mourão — CE",uf:"CE",nome:"Galetos",contato:"",canal:"Food Service",ir:"Piatto",sv:"Agendado",prox:"Agendar reunião presencial",data:"2025-05-05",barr:"",insta:"",site:"",produtos:"",obs:"Agendamento próxima semana"},
+  {pr:"José Mourão — CE",uf:"CE",nome:"Max Rede",contato:"",canal:"Rede",ir:"Piatto",sv:"Agendado",prox:"Agendar reunião presencial",data:"2025-05-05",barr:"",insta:"",site:"",produtos:"",obs:"Agendamento próxima semana"},
+];
+
+let relatorios=[
+  // João Beltrão
+  {pr:"João Beltrão — PE/PB",data:"2025-04-24",cliente:"Grupo Pajeú",        ir:"Piatto",res:"Agendado",        prox:"Agendar reunião presencial",    followup:"2025-05-04",link:"",produtos:"Bases e Fundos Piatto",resumo:"Saindo da central de compras do Grupo Pajeú. Cash local: 01 Recife, 07 sertão. Bate papo agendado para 04/05 às 14h"},
+  {pr:"João Beltrão — PE/PB",data:"2025-04-24",cliente:"Karne e Keijo",       ir:"Piatto",res:"Em negociação",   prox:"Enviar proposta comercial",      followup:"2025-04-27",link:"https://www.karneKeijo.com.br/",produtos:"Bases e Fundos, Molhos Piatto",resumo:"Indo à Karne e Keijo — distribuidor food. Cliente demonstrou interesse em bases e molhos"},
+  {pr:"João Beltrão — PE/PB",data:"2025-04-24",cliente:"B&A Distribuidora",   ir:"Piatto",res:"Prospect",        prox:"Agendar reunião presencial",     followup:"2025-05-05",link:"https://www.instagram.com/beacomercial?igsh=cTZoaXB6ZGdxamFh",produtos:"",resumo:"Perfil Instagram B&A Distribuidora — 13K seguidores. Site A&B Alimentos e Bebidas identificado"},
+  {pr:"João Beltrão — PE/PB",data:"2025-04-24",cliente:"Cadan Distribuidora", ir:"Piatto",res:"Bloqueado (ext)", prox:"Recontato em data específica",   followup:"2026-06-01",link:"",produtos:"",resumo:"Consultoria bloqueando novos fornecedores até conclusão prevista para jun/26"},
+  {pr:"João Beltrão — PE/PB",data:"2025-04-27",cliente:"Karne e Keijo",       ir:"Piatto",res:"Agendado",        prox:"Aguardar retorno do cliente",    followup:"2025-04-28",link:"https://www.karneKeijo.com.br/",produtos:"Bases e Fundos, Molhos, Temperos Piatto",resumo:"Reunião com comprador confirmada para 27/04 às 14h30. Boa receptividade ao portfólio"},
+  // José Mourão — relatório real
+  {pr:"José Mourão — CE",data:"2025-04-25",cliente:"ISM / Omega / Solmar + agendamentos",ir:"Piatto",res:"Em negociação",prox:"Agendar reunião presencial",followup:"2025-05-05",link:"",
+   produtos:"ISM: Gelatina Pó 120g, Pudim Leite 510g, Mousses, Achocolatado 1kg, Chocolate em Pó 33/50% Cacau, Amido de Milho, Amaciante de Carne, Caldos de Galinha/Carne, Purê de Batatas | Omega: Amido de Milho, Caldos, Purê, Batata em Flocos | Solmar: em avaliação",
+   resumo:"ISM (Restaurante Industrial — diversas unidades no Brasil): mix de interesse definido para o CE. Aguardando Área de Nutrição informar quantidade necessária de Purê de Batatas para amostragem e testes. Unidades podem ter mix divergente por regionalidade.\n\nOmega Distrib.: mix sendo avaliado. Recebendo produto com custo pontuado anteriormente — diferença significativa de custo. Linha de refresco em pó ainda em avaliação.\n\nSolmar: em avaliação, atualmente com mix de 3 fabricantes.\n\nAgendamentos próxima semana: Serlares, Laredo, Fortali, Façanha, Galetos e Max Rede."},
+];
+
+let ausencias=[
+  {pr:"João Beltrão — PE/PB",dataInicio:"2025-05-07",dataFim:"2025-05-09",motivo:"Viagem pessoal"},
+];
+
+let currentUser=null;
+let tipoAtivo=null;
+let calYear,calMonth;
+(function(){const t=new Date();calYear=t.getFullYear();calMonth=t.getMonth()})();
+
+// ── AUTH ──────────────────────────────────────────────────────────────────────
+function doLogin(){
+  const uid=document.getElementById('loginUser').value;
+  const pass=document.getElementById('loginPass').value;
+  const err=document.getElementById('loginError');
+  if(!uid){err.style.display='block';err.textContent='Selecione um usuário.';return}
+  const u=USERS[uid];
+  if(!u||pass!==u.senha){err.style.display='block';err.textContent='Usuário ou senha incorretos. Tente novamente.';return}
+  err.style.display='none';
+  currentUser={...u,uid};
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('appScreen').style.display='block';
+  document.getElementById('userLabel').textContent=u.nome;
+  document.getElementById('loginPass').value='';
+  buildTopbar();buildTabs();tipoAtivo=null;switchTabById('dashboard');
+}
+function doLogout(){
+  currentUser=null;
+  document.getElementById('appScreen').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginPass').value='';
+  document.getElementById('loginError').style.display='none';
+}
+function isAdm(){return currentUser?.role==='ADM'}
+function buildTopbar(){
+  const wrap=document.getElementById('prSelector'),sel=document.getElementById('prSel');
+  if(isAdm()){wrap.style.display='block';sel.innerHTML=`<option value="TODOS">Todos os Parceiros</option>`+PRS.map(p=>`<option value="${p.id}">${p.nome} — ${p.ufs}</option>`).join("");}
+  else wrap.style.display='none';
+}
+function buildTabs(){
+  const tabs=isAdm()
+    ?[['dashboard','Dashboard'],['clientes','Clientes Prospectados'],['relatorios','Relatórios do PR'],['funil','Funil & Performance'],['novo','+ Novo Registro']]
+    :[['dashboard','Meu Dashboard'],['clientes','Meus Clientes'],['relatorios','Meus Relatórios'],['novo','+ Novo Registro']];
+  document.getElementById('tabbar').innerHTML=tabs.map(([id,label])=>
+    `<div class="tab" id="tab-${id}" onclick="switchTabById('${id}')">${label}</div>`).join("");
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function pr(){return isAdm()?(document.getElementById('prSel')?.value||'TODOS'):currentUser?.prId}
+function prObj(id){return PRS.find(p=>p.id===id)}
+function fmt(d){if(!d)return"—";const[y,m,dy]=d.split("-");return`${dy}/${m}/${y}`}
+function ini(n){return n.split(" ").slice(0,2).map(x=>x[0]).join("").toUpperCase()}
+function irPill(ir){const o=IRS.find(i=>i.id===ir);return o?`<span class="ir-pill ${o.css}">${ir}</span>`:`<span class="ir-pill bz">${ir}</span>`}
+function svBadge(s){
+  const m={"Agendado":"bg","Pedido fechado":"bg","Em negociação":"bp","Proposta enviada":"bb","Bloqueado (ext)":"br","Prospect":"bz","Recontato futuro":"ba","Sem interesse":"bz"};
+  const dot={"Agendado":"#1a7a3f","Pedido fechado":"#1a7a3f","Em negociação":"#4f46e5","Proposta enviada":"#002b81","Bloqueado (ext)":"#bf0811","Prospect":"#9ca3af","Recontato futuro":"#9a5000","Sem interesse":"#9ca3af"};
+  return`<span class="badge ${m[s]||'bz'}"><span style="width:5px;height:5px;border-radius:50%;background:${dot[s]||'#9ca3af'};flex-shrink:0"></span>${s}</span>`;
+}
+function lkCell(url){if(!url)return"—";return`<span class="lk"><a href="${url}" target="_blank">${url.includes("instagram")?"Instagram":"Site"}</a></span>`}
+function filtCli(){const p=pr();return(!p||p==='TODOS')?clientes:clientes.filter(c=>c.pr===p)}
+function filtRel(){const p=pr();return(!p||p==='TODOS')?relatorios:relatorios.filter(r=>r.pr===p)}
+function tipIcon(txt){return`<span class="tip-icon" data-tip="${txt.replace(/"/g,"&quot;")}">?</span>`}
+function toggleResumo(btn){const el=btn.previousElementSibling;const vis=el.style.display==='block';el.style.display=vis?'none':'block';btn.textContent=vis?'Ver mais':'Ver menos'}
+
+// ── CALENDAR ──────────────────────────────────────────────────────────────────
+function buildCalendar(){
+  const p=pr(),isTodos=(!p||p==='TODOS');
+  const firstDay=new Date(calYear,calMonth,1),lastDay=new Date(calYear,calMonth+1,0);
+  const startDow=(firstDay.getDay()+6)%7;
+  const months=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+  const evMap={};
+  function addEv(ds,type,label){if(!evMap[ds])evMap[ds]=[];evMap[ds].push({type,label})}
+  const relF=isTodos?relatorios:relatorios.filter(r=>r.pr===p);
+  const cliF=isTodos?clientes:clientes.filter(c=>c.pr===p);
+  const ausF=isTodos?ausencias:ausencias.filter(a=>a.pr===p);
+  relF.forEach(r=>{if(r.followup)addEv(r.followup,"followup","Follow-up: "+r.cliente)});
+  cliF.forEach(c=>{if(c.data&&c.sv==="Agendado")addEv(c.data,"visita","Visita: "+c.nome)});
+  ausF.forEach(a=>{
+    let cur=new Date(a.dataInicio+"T12:00:00"),end=new Date(a.dataFim+"T12:00:00");
+    const pN=prObj(a.pr)?.nome||a.pr;
+    while(cur<=end){addEv(cur.toISOString().slice(0,10),"ausencia","Ausência"+(isTodos?" ("+pN+")":"")+": "+a.motivo);cur.setDate(cur.getDate()+1)}
+  });
+  const DOW=["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"];
+  let html='<div class="cal-header"><div class="cal-title">'+months[calMonth]+' '+calYear+'</div><div class="cal-nav"><button class="cal-btn" onclick="calNav(-1)">&#8249;</button><button class="cal-btn" onclick="calNav(1)">&#8250;</button></div></div><div class="cal-grid">'+DOW.map(d=>'<div class="cal-dow">'+d+'</div>').join('');
+  const today=new Date();today.setHours(0,0,0,0);
+  for(let i=0;i<startDow;i++) html+='<div class="cal-day other"></div>';
+  for(let d=1;d<=lastDay.getDate();d++){
+    const ds=calYear+'-'+String(calMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const evs=evMap[ds]||[],isToday=new Date(ds+'T12:00:00').getTime()===today.getTime();
+    const dotC={followup:"#002b81",visita:"#1a7a3f",ausencia:"#bf0811"};
+    const dots=evs.map(e=>'<span class="cal-dot" style="background:'+dotC[e.type]+'"></span>').join('');
+    const tip=evs.map(e=>e.label).join('\n');
+    html+='<div class="cal-day'+(isToday?' today':'')+'"'+(tip?' data-tip="'+tip.replace(/"/g,'&quot;')+'"':'')+'><span class="cal-day-num">'+d+'</span>'+(dots?'<div class="cal-dots">'+dots+'</div>':'')+'</div>';
+  }
+  const used=startDow+lastDay.getDate(),rem=used%7?7-(used%7):0;
+  for(let i=0;i<rem;i++) html+='<div class="cal-day other"></div>';
+  html+='</div><div class="cal-legend"><div class="cal-leg-item"><span class="cal-dot" style="background:#002b81;width:8px;height:8px"></span>Follow-up</div><div class="cal-leg-item"><span class="cal-dot" style="background:#1a7a3f;width:8px;height:8px"></span>Visita agendada</div><div class="cal-leg-item"><span class="cal-dot" style="background:#bf0811;width:8px;height:8px"></span>Ausência do PR</div><div class="cal-leg-item" style="font-style:italic">Passe o mouse sobre o dia para ver detalhes</div></div>';
+  return html;
+}
+function calNav(dir){calMonth+=dir;if(calMonth>11){calMonth=0;calYear++}if(calMonth<0){calMonth=11;calYear--}document.getElementById('calContainer').innerHTML=buildCalendar()}
+
+// ── DASHBOARD ─────────────────────────────────────────────────────────────────
+function renderDashboard(){
+  const cli=filtCli(),rel=filtRel(),p=pr(),isTodos=(isAdm()&&(!p||p==='TODOS'));
+  const total=cli.length,fechados=cli.filter(c=>c.sv==="Pedido fechado").length;
+  const bloq=cli.filter(c=>c.sv==="Bloqueado (ext)").length,conv=total?Math.round(fechados/total*100):0;
+  const pend=cli.filter(c=>c.sv!=="Pedido fechado"&&c.data).length;
+  let html='<div class="kpi-grid"><div class="kpi"><div class="kpi-ac" style="background:var(--b)"></div><div class="kpi-lbl">Total no funil</div><div class="kpi-num">'+total+'</div><div class="kpi-sub">'+(isTodos?PRS.length+' PRs cadastrados':'clientes cadastrados')+'</div></div><div class="kpi"><div class="kpi-ac" style="background:var(--green)"></div><div class="kpi-lbl">Pedidos fechados</div><div class="kpi-num grn">'+fechados+'</div><div class="kpi-sub">vendas realizadas</div></div><div class="kpi"><div class="kpi-ac" style="background:var(--b)"></div><div class="kpi-lbl">Conversão</div><div class="kpi-num">'+conv+'%</div><div class="kpi-sub">leads → pedido</div></div><div class="kpi"><div class="kpi-ac" style="background:var(--r)"></div><div class="kpi-lbl">Bloqueados</div><div class="kpi-num red">'+bloq+'</div><div class="kpi-sub">barreiras externas</div></div><div class="kpi"><div class="kpi-ac" style="background:#d97706"></div><div class="kpi-lbl">Follow-ups pend.</div><div class="kpi-num amb">'+pend+'</div><div class="kpi-sub">aguardando ação</div></div><div class="kpi"><div class="kpi-ac" style="background:var(--b)"></div><div class="kpi-lbl">Relatórios receb.</div><div class="kpi-num">'+rel.length+'</div><div class="kpi-sub">reportes de campo</div></div></div>';
+  if(bloq>0){const bs=cli.filter(c=>c.sv==="Bloqueado (ext)");html+='<div class="alert danger"><span>🔴</span><span><strong>'+bloq+' bloqueio'+(bloq>1?'s':'')+' ativo'+(bloq>1?'s':'')+':</strong> '+bs.map(c=>c.nome).join(' · ')+'</span></div>'}
+  const ok=cli.filter(c=>c.sv==="Pedido fechado");
+  if(ok.length) html+='<div class="alert success"><span>✅</span><span><strong>'+ok.length+' pedido'+(ok.length>1?'s':'')+' fechado'+(ok.length>1?'s':'')+':</strong> '+ok.map(c=>c.nome).join(' · ')+'</span></div>';
+  if(isTodos){
+    html+='<div class="stitle">Parceiros Representantes</div><div class="pr-cards">';
+    PRS.forEach(pr_=>{
+      const c=clientes.filter(x=>x.pr===pr_.id),f=c.filter(x=>x.sv==="Pedido fechado").length,a=c.filter(x=>x.sv==="Agendado").length;
+      html+='<div class="pr-card" onclick="selectPr(\''+pr_.id+'\')"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div class="av">'+ini(pr_.nome)+'</div><div><div class="pr-card-name">'+pr_.nome+'</div><div class="pr-card-uf">'+pr_.ufs+'</div></div></div><div style="margin-bottom:8px">'+pr_.irs.map(ir=>irPill(ir)).join('')+'</div><div class="pr-card-stats"><div class="pr-card-stat"><strong style="color:var(--b)">'+c.length+'</strong>clientes</div><div class="pr-card-stat"><strong style="color:var(--green)">'+f+'</strong>fechados</div><div class="pr-card-stat"><strong style="color:#d97706">'+a+'</strong>agendados</div></div></div>';
+    });
+    html+='</div>';
+  }
+  html+='<div class="stitle">Agenda — follow-ups, visitas e ausências</div><div class="cal-wrap" id="calContainer">'+buildCalendar()+'</div>';
+  const showPr=isTodos;
+  html+='<div class="stitle">Últimos relatórios</div><div class="twrap"><table><thead><tr><th>Data</th>'+(showPr?'<th>PR</th>':'')+'<th>Cliente</th><th>IR</th><th>Resultado</th><th>Produtos de interesse</th><th>Próximo passo</th><th>Detalhes</th></tr></thead><tbody>';
+  if(!rel.length) html+='<tr><td colspan="'+(showPr?8:7)+'"><div class="empty">Nenhum relatório registrado</div></td></tr>';
+  else rel.slice().reverse().slice(0,6).forEach(r=>{
+    const pro=prObj(r.pr),resumoCurto=(r.resumo||'').substring(0,60),temMais=(r.resumo||'').length>60;
+    html+='<tr><td style="white-space:nowrap">'+fmt(r.data)+'</td>'+(showPr?'<td><div class="row-pr"><div class="av" style="width:24px;height:24px;font-size:9px">'+ini(pro?.nome||r.pr)+'</div><span style="font-size:11px">'+(pro?.nome||r.pr)+'</span></div></td>':'')+'<td><div class="t-name">'+r.cliente+'</div></td><td>'+irPill(r.ir)+'</td><td>'+svBadge(r.res)+'</td><td style="font-size:11px;color:var(--muted);max-width:160px">'+(r.produtos||'—')+'</td><td style="font-size:11px">'+r.prox+'</td><td style="font-size:11px;max-width:180px">'+resumoCurto+(temMais?'…':'')+(temMais?'<div class="rel-resumo-full">'+(r.resumo||'').replace(/\n/g,'<br>')+'</div><span class="rel-toggle" onclick="toggleResumo(this)">Ver mais</span>':'')+'</td></tr>';
+  });
+  html+='</tbody></table></div>';
+  document.getElementById('dashboard').innerHTML=html;
+}
+
+// ── CLIENTES ──────────────────────────────────────────────────────────────────
+function renderClientes(){
+  const cli=filtCli(),isTodos=(isAdm()&&(!pr()||pr()==='TODOS'));
+  let html='<div class="twrap"><table><thead><tr><th>Cliente</th><th>UF</th>'+(isTodos?'<th>PR</th>':'')+'<th>Canal</th><th>IR</th><th>Status</th><th>Produtos de interesse</th><th>Próximo passo</th><th>Barreira</th><th>Link</th></tr></thead><tbody>';
+  if(!cli.length) html+='<tr><td colspan="'+(isTodos?10:9)+'"><div class="empty">Nenhum cliente cadastrado</div></td></tr>';
+  else cli.forEach(c=>{
+    const pro=prObj(c.pr),link=c.insta||c.site;
+    html+='<tr><td><div class="t-name">'+c.nome+'</div><div class="t-sub">'+(c.contato||'—')+'</div></td><td style="text-align:center;font-size:11px">'+c.uf+'</td>'+(isTodos?'<td style="font-size:11px">'+(pro?.nome||c.pr)+'</td>':'')+'<td style="font-size:11px">'+c.canal+'</td><td>'+irPill(c.ir)+'</td><td>'+svBadge(c.sv)+'</td><td style="font-size:11px;color:var(--muted);max-width:140px">'+(c.produtos||'—')+'</td><td style="font-size:11px">'+(c.prox||'—')+'<div class="t-sub">'+fmt(c.data)+'</div></td><td style="font-size:11px;color:var(--rd);max-width:120px">'+(c.barr||'—')+'</td><td>'+(link?lkCell(link):'—')+'</td></tr>';
+  });
+  html+='</tbody></table></div>';
+  document.getElementById('clientes').innerHTML=html;
+}
+
+// ── RELATÓRIOS ────────────────────────────────────────────────────────────────
+function renderRelatorios(){
+  const rel=filtRel(),isTodos=(isAdm()&&(!pr()||pr()==='TODOS'));
+  let html='<div class="twrap"><table><thead><tr><th>Data</th>'+(isTodos?'<th>PR</th>':'')+'<th>Cliente</th><th>IR</th><th>Resultado</th><th>Produtos de interesse</th><th>Próximo passo</th><th>Follow-up</th><th>Detalhes</th></tr></thead><tbody>';
+  if(!rel.length) html+='<tr><td colspan="'+(isTodos?9:8)+'"><div class="empty">Nenhum relatório registrado</div></td></tr>';
+  else rel.slice().reverse().forEach(r=>{
+    const pro=prObj(r.pr),resumoCurto=(r.resumo||'').substring(0,60),temMais=(r.resumo||'').length>60;
+    html+='<tr><td style="white-space:nowrap">'+fmt(r.data)+'</td>'+(isTodos?'<td><div class="row-pr"><div class="av" style="width:24px;height:24px;font-size:9px">'+ini(pro?.nome||r.pr)+'</div><span style="font-size:11px">'+(pro?.nome||r.pr)+'</span></div></td>':'')+'<td><div class="t-name">'+r.cliente+'</div></td><td>'+irPill(r.ir)+'</td><td>'+svBadge(r.res)+'</td><td style="font-size:11px;color:var(--muted);max-width:150px">'+(r.produtos||'—')+'</td><td style="font-size:11px">'+r.prox+'</td><td style="font-size:11px;white-space:nowrap">'+fmt(r.followup)+'</td><td style="font-size:11px;max-width:180px">'+resumoCurto+(temMais?'…':'')+(temMais?'<div class="rel-resumo-full">'+(r.resumo||'').replace(/\n/g,'<br>')+'</div><span class="rel-toggle" onclick="toggleResumo(this)">Ver mais</span>':'')+'</td></tr>';
+  });
+  html+='</tbody></table></div>';
+  document.getElementById('relatorios').innerHTML=html;
+}
+
+// ── FUNIL ─────────────────────────────────────────────────────────────────────
+let fChart=null;
+function renderFunil(){
+  const stages=[{l:"Prospect",k:"Prospect",c:"#6b7494"},{l:"Agendado",k:"Agendado",c:"#1a7a3f"},{l:"Em negociação",k:"Em negociação",c:"#4f46e5"},{l:"Proposta enviada",k:"Proposta enviada",c:"#002b81"},{l:"Pedido fechado",k:"Pedido fechado",c:"#14532d"},{l:"Recontato futuro",k:"Recontato futuro",c:"#9a5000"},{l:"Bloqueado (ext)",k:"Bloqueado (ext)",c:"#bf0811"}];
+  const cli=filtCli(),total=cli.length||1,vals=stages.map(s=>cli.filter(c=>c.sv===s.k).length);
+  const bars=stages.map((s,i)=>{const v=vals[i],pct=Math.round(v/total*100);return'<div class="fbar"><div class="flabel"><span>'+s.l+'</span><span><strong>'+v+'</strong> cliente'+(v!==1?'s':'')+' ('+pct+'%)</span></div><div class="ftrack"><div class="ffill" style="width:'+(pct||0)+'%;background:'+s.c+'"></div></div></div>';}).join('');
+  const prRows=PRS.map(pob=>{
+    const c=clientes.filter(x=>x.pr===pob.id),f=c.filter(x=>x.sv==="Pedido fechado").length,b=c.filter(x=>x.sv==="Bloqueado (ext)").length,a=c.filter(x=>x.sv==="Agendado").length,n=c.filter(x=>x.sv==="Em negociação").length,conv=c.length?Math.round(f/c.length*100):0,sel=pr()===pob.id;
+    return'<tr'+(sel?' style="background:var(--b2)"':'')+'><td><div class="row-pr"><div class="av" style="width:26px;height:26px;font-size:9px">'+ini(pob.nome)+'</div><div><div class="t-name">'+pob.nome+'</div><div class="t-sub">'+pob.ufs+'</div></div></div></td><td style="text-align:center">'+(c.length||'—')+'</td><td style="text-align:center">'+(a>0?'<span class="badge bg">'+a+'</span>':'—')+'</td><td style="text-align:center">'+(n>0?'<span class="badge bp">'+n+'</span>':'—')+'</td><td style="text-align:center;font-weight:500;color:var(--green)">'+(f>0?f:'—')+'</td><td style="text-align:center">'+(c.length?'<span class="badge '+(conv>=15?'bg':conv>=8?'ba':'br')+'">'+conv+'%</span>':'—')+'</td><td style="text-align:center">'+(b>0?'<span class="badge br">'+b+'</span>':'—')+'</td><td>'+pob.irs.map(ir=>irPill(ir)).join(' ')+'</td></tr>';}).join('');
+  document.getElementById('funil').innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start"><div><div class="stitle">Funil — '+((!pr()||pr()==='TODOS')?"Todos os PRs":pr())+'</div>'+bars+'</div><div style="position:relative;height:260px"><canvas id="fChart" role="img" aria-label="Gráfico funil">'+stages.map((s,i)=>s.l+': '+vals[i]).join(', ')+'</canvas></div></div><div class="stitle" style="margin-top:20px">Comparativo — todos os PRs</div><div class="twrap"><table><thead><tr><th>PR</th><th style="text-align:center">Clientes</th><th style="text-align:center">Agendados</th><th style="text-align:center">Negociação</th><th style="text-align:center">Fechados</th><th style="text-align:center">Conversão</th><th style="text-align:center">Bloqueados</th><th>IRs</th></tr></thead><tbody>'+prRows+'</tbody></table></div>';
+  setTimeout(()=>{const ctx=document.getElementById('fChart');if(!ctx)return;if(fChart)fChart.destroy();fChart=new Chart(ctx,{type:'bar',data:{labels:stages.map(s=>s.l),datasets:[{label:'Clientes',data:vals,backgroundColor:stages.map(s=>s.c),borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{stepSize:1,color:'#6b7494',font:{size:10}},grid:{color:'rgba(0,0,0,.05)'}},y:{ticks:{color:'#6b7494',font:{size:10}},grid:{display:false}}}}});},80);
+}
+
+// ── NOVO REGISTRO ─────────────────────────────────────────────────────────────
+function renderNovo(){
+  const curPr=isAdm()?((!pr()||pr()==='TODOS')?"João Beltrão — PE/PB":pr()):currentUser.prId;
+  const today=new Date().toISOString().slice(0,10);
+  const prOptions=PRS.map(p=>'<option'+(p.id===curPr?' selected':'')+'value="'+p.id+'">'+p.nome+' ('+p.ufs+')</option>').join('');
+  const irOptions=IRS.map(i=>'<option>'+i.id+'</option>').join('');
+  const tipoCards=[{id:"cliente",icon:"🏢",label:"Novo Cliente",desc:"Cadastrar cliente prospectado"},{id:"relatorio",icon:"📋",label:"Relatório de Campo",desc:"Registrar reporte de visita ou contato"},{id:"ausencia",icon:"📅",label:"Ausência do PR",desc:"Registrar período de indisponibilidade"}];
+  let html='<div style="max-width:700px"><div class="stitle">O que deseja registrar?</div><div class="tipo-grid">'+tipoCards.map(t=>'<div class="tipo-card'+(tipoAtivo===t.id?' sel':'')+'" onclick="selectTipo(\''+t.id+'\')"><div class="tipo-icon">'+t.icon+'</div><div class="tipo-label">'+t.label+'</div><div class="tipo-desc">'+t.desc+'</div></div>').join('')+'</div>';
+  // CLIENTE
+  html+='<div class="form-area'+(tipoAtivo==='cliente'?' active':'')+'" id="fa-cliente"><div class="fcard"><div class="fcard-title">🏢 Novo Cliente Prospectado</div><div class="fgrid">'+(isAdm()?'<div class="fg ff"><label>PR Responsável</label><select id="f_pr">'+prOptions+'</select></div>':'<input type="hidden" id="f_pr" value="'+curPr+'">')+'<div class="fg"><label>Nome do cliente</label><input id="f_nome" placeholder="Razão social ou fantasia"></div><div class="fg"><label>UF</label><input id="f_uf" placeholder="PE" maxlength="2"></div><div class="fg"><label>Contato / Comprador</label><input id="f_cont" placeholder="Nome do comprador"></div><div class="fg"><label>Canal</label><select id="f_canal">'+CANAIS.map(c=>'<option>'+c+'</option>').join('')+'</select></div><div class="fg"><label>IR apresentada</label><select id="f_ir">'+irOptions+'</select></div><div class="fg"><label>Origem do lead</label><select id="f_orig">'+ORIGENS.map(o=>'<option>'+o+'</option>').join('')+'</select></div><div class="fg"><label>Status da visita</label><select id="f_sv">'+STATUS_V.map(s=>'<option>'+s+'</option>').join('')+'</select></div><div class="fg"><label>Instagram</label><input id="f_insta" type="url" placeholder="https://instagram.com/..."></div><div class="fg"><label>Site</label><input id="f_site" type="url" placeholder="https://..."></div><div class="fg"><label>Próximo passo</label><select id="f_prox">'+PROXIMO_PASSO.map(s=>'<option>'+s+'</option>').join('')+'</select></div><div class="fg"><label>Data da ação '+tipIcon("Indique quando este próximo passo será executado.\nEsta é a data em que o PR deve retomar o contato.")+'</label><input id="f_data" type="date" value="'+today+'"></div><div class="fg ff"><label>Barreira / Bloqueio</label><input id="f_barr" placeholder="Deixe vazio se não houver barreira"></div><div class="fg ff"><label>Observações</label><textarea id="f_obs" placeholder="Contexto da visita, detalhes sobre o cliente..."></textarea></div></div><button class="btn" onclick="saveCli()">Salvar cliente</button></div></div>';
+  // RELATÓRIO
+  html+='<div class="form-area'+(tipoAtivo==='relatorio'?' active':'')+'" id="fa-relatorio"><div class="fcard"><div class="fcard-title">📋 Relatório de Campo</div><div class="fgrid">'+(isAdm()?'<div class="fg ff"><label>PR</label><select id="r_pr">'+prOptions+'</select></div>':'<input type="hidden" id="r_pr" value="'+curPr+'">')+'<div class="fg"><label>Data</label><input id="r_data" type="date" value="'+today+'"></div><div class="fg"><label>Cliente visitado</label><input id="r_cli" placeholder="Nome do cliente"></div><div class="fg"><label>IR apresentada</label><select id="r_ir">'+irOptions+'</select></div><div class="fg"><label>Resultado da visita</label><select id="r_res">'+STATUS_V.map(s=>'<option>'+s+'</option>').join('')+'</select></div><div class="fg"><label>Próximo passo</label><select id="r_prox">'+PROXIMO_PASSO.map(s=>'<option>'+s+'</option>').join('')+'</select></div><div class="fg ff"><label>Produtos de interesse / recomendados '+tipIcon("Digite livremente os produtos que o cliente demonstrou interesse\nou que você acredita ser acertivos para este cliente.\nEx: Purê de Batatas, Caldos, Amido de Milho")+'</label><textarea id="r_produtos" placeholder="Ex: Purê de Batatas, Caldos de carne e galinha, Amido de Milho..." style="min-height:48px"></textarea></div><div class="fg"><label>Data do follow-up '+tipIcon("Indique quando você planeja retomar contato.\nEsta data aparece na agenda do dashboard\ne lembra o prazo para executar o próximo passo.")+'</label><input id="r_fup" type="date"></div><div class="fg"><label>Instagram / Site do cliente</label><input id="r_link" type="url" placeholder="https://..."></div><div class="fg ff"><label>Detalhes do reporte '+tipIcon("Descreva tudo que julgar importante sobre esta visita ou contato:\ncomo foi a recepção, o que foi discutido, objeções levantadas,\noportunidades identificadas, informações relevantes sobre o cliente.")+'</label><textarea id="r_texto" placeholder="Descreva os detalhes relevantes desta visita ou contato..."></textarea></div></div><button class="btn" onclick="saveRel()">Salvar relatório</button></div></div>';
+  // AUSÊNCIA
+  html+='<div class="form-area'+(tipoAtivo==='ausencia'?' active':'')+'" id="fa-ausencia"><div class="fcard"><div class="fcard-title">📅 Registrar Ausência do PR</div><div class="fgrid">'+(isAdm()?'<div class="fg ff"><label>PR</label><select id="a_pr">'+prOptions+'</select></div>':'<input type="hidden" id="a_pr" value="'+curPr+'">')+'<div class="fg"><label>Data início</label><input id="a_ini" type="date"></div><div class="fg"><label>Data fim</label><input id="a_fim" type="date"></div><div class="fg ff"><label>Motivo</label><input id="a_mot" placeholder="Ex: Viagem pessoal, férias, feriado regional..."></div></div><button class="btn" onclick="saveAus()">Registrar ausência</button></div></div></div>';
+  document.getElementById('novo').innerHTML=html;
+}
+
+function selectTipo(id){tipoAtivo=tipoAtivo===id?null:id;renderNovo()}
+function g(id){return document.getElementById(id)?.value||''}
+function saveCli(){if(!g('f_nome')){alert('Informe o nome do cliente');return}clientes.push({pr:g('f_pr'),uf:g('f_uf').toUpperCase(),nome:g('f_nome'),contato:g('f_cont'),canal:g('f_canal'),ir:g('f_ir'),sv:g('f_sv'),prox:g('f_prox'),data:g('f_data'),barr:g('f_barr'),insta:g('f_insta'),site:g('f_site'),origem:g('f_orig'),produtos:'',obs:g('f_obs')});tipoAtivo=null;if(isAdm())document.getElementById('prSel').value=g('f_pr');switchTabById('clientes')}
+function saveRel(){if(!g('r_cli')){alert('Informe o cliente');return}relatorios.push({pr:g('r_pr'),data:g('r_data'),cliente:g('r_cli'),ir:g('r_ir'),res:g('r_res'),prox:g('r_prox'),followup:g('r_fup'),link:g('r_link'),produtos:g('r_produtos'),resumo:g('r_texto')});tipoAtivo=null;if(isAdm())document.getElementById('prSel').value=g('r_pr');switchTabById('relatorios')}
+function saveAus(){if(!g('a_ini')||!g('a_fim')){alert('Informe as datas de início e fim');return}ausencias.push({pr:g('a_pr'),dataInicio:g('a_ini'),dataFim:g('a_fim'),motivo:g('a_mot')||'Ausência'});tipoAtivo=null;if(isAdm())document.getElementById('prSel').value=g('a_pr');switchTabById('dashboard')}
+function selectPr(id){if(isAdm())document.getElementById('prSel').value=id;switchTabById('dashboard')}
+function switchTabById(id){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));const tab=document.getElementById('tab-'+id);if(tab)tab.classList.add('active');const view=document.getElementById(id);if(view)view.classList.add('active');render()}
+function render(){const id=document.querySelector('.view.active')?.id;if(id==='dashboard')renderDashboard();else if(id==='clientes')renderClientes();else if(id==='relatorios')renderRelatorios();else if(id==='funil'&&isAdm())renderFunil();else if(id==='novo')renderNovo()}
+</script>
+</body>
+</html>
